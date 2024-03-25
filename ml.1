@@ -1,1 +1,81 @@
-this is new file
+import numpy as np # linear algebra
+import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
+import matplotlib.pyplot as plt       # matplotlib.pyplot plots data
+%matplotlib inline 
+import seaborn as sns
+
+
+pdata = pd.read_csv("/content/archive.zip")
+
+
+pdata = pd.read_csv("/content/archive.zip")
+
+pdata = pd.read_csv("/content/archive.zip")
+
+pdata.isnull().values.any() # If there are any null values in data set
+
+columns = list(pdata)[0:-1] # Excluding Outcome column which has only 
+pdata[columns].hist(stacked=False, bins=100, figsize=(12,30), layout=(14,2)); 
+# Histogram of first 8 columns
+
+pdata.corr() # It will show correlation matrix
+
+# However we want to see correlation in graphical representation so below is function for that
+def plot_corr(df, size=11):
+    corr = df.corr()
+    fig, ax = plt.subplots(figsize=(size, size))
+    ax.matshow(corr)
+    plt.xticks(range(len(corr.columns)), corr.columns)
+    plt.yticks(range(len(corr
+
+    sns.pairplot(pdata,diag_kind='kde')
+
+    n_true = len(pdata.loc[pdata['part_time_job'] == True])
+n_false = len(pdata.loc[pdata['part_time_job'] == False])
+print("Number of true cases: {0} ({1:2.2f}%)".format(n_true, (n_true / (n_true + n_false)) * 100 ))
+print("Number of false cases: {0} ({1:2.2f}%)".format(n_false, (n_false / (n_true + n_false)) * 100))
+
+
+from sklearn.model_selection import train_test_split
+
+X = pdata.drop('geography_score',axis=1)     # Predictor feature columns (8 X m)
+Y = pdata['geography_score']   # Predicted class (1=True, 0=False) (1 X m)
+
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2, random_state=1)
+# 1 is just any random seed number
+
+x_train.head()
+
+print("{0:0.2f}% data is in training set".format((len(x_train)/len(pdata.index)) * 100))
+print("{0:0.2f}% data is in test set".format((len(x_test)/len(pdata.index)) * 100))
+
+x_train.head()
+
+x_train.info()
+
+from sklearn import metrics
+
+from sklearn.linear_model import LogisticRegression
+
+# Fit the model on train
+model = LogisticRegression()
+model.fit(x_train, y_train)
+#predict on test
+y_predict = model.predict(x_test)
+
+
+coef_df = pd.DataFrame(model.coef_)
+coef_df['intercept'] = model.intercept_
+print(coef_df)
+
+
+model_score = model.score(x_test, y_test)
+print(model_score)
+
+
+cm=metrics.confusion_matrix(y_test, y_predict, labels=[1, 0])
+
+df_cm = pd.DataFrame(cm, index = [i for i in ["1","0"]],
+                  columns = [i for i in ["Predict 1","Predict 0"]])
+plt.figure(figsize = (7,5))
+sns.heatmap(df_cm, annot=True)
